@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Alessandro Bugatti">
+  <title>Progetti didattici PHP con Docker e PHPStorm</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.css">
+  <style>
+    .reveal .sourceCode {  /* see #7635 */
+      overflow: visible;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/theme/solarized.css" id="theme">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Progetti didattici PHP con Docker e PHPStorm</h1>
+  <p class="author">Alessandro Bugatti</p>
+  <p class="date">30-03-2026</p>
+</section>
+
+<section>
+<section id="progetti-didattici-php" class="title-slide slide level1">
+<h1>Progetti didattici PHP</h1>
+<p>con Docker e PHPStorm</p>
+</section>
+<section id="immagine-base-condivisa" class="slide level2">
+<h2>Immagine base condivisa</h2>
+<p>Al posto di avere un’immagine per ogni progetto, si crea un’immagine
+base da condividere in ogni progetto.</p>
+<pre><code>docker-didattica/
+├── docker-base-image/   ← costruita una volta sola
+├── progetto-a/          ← usa l&#39;immagine base
+├── progetto-b/          ← usa l&#39;immagine base
+└── progetto-c/          ← usa l&#39;immagine base</code></pre>
+<p>Il codice di ogni progetto entra nel container<br />
+tramite <strong>bind mount</strong>, non costruendo una nuova
+immagine</p>
+</section>
+<section id="struttura-docker-base-image" class="slide level2">
+<h2>Struttura: docker-base-image</h2>
+<pre><code>docker-base-image/
+├── Dockerfile
+├── apache-php/
+│   ├── php.ini
+│   └── php-production.ini
+└── apache-config/
+    ├── 000-default.conf
+    └── ssl-default.conf</code></pre>
+<p>Contiene tutto ciò che è comune:<br />
+PHP 8.2, Apache, Composer, estensioni, config SSL</p>
+</section>
+<section id="cosa-include-limmagine-base" class="slide level2">
+<h2>Cosa include l’immagine base</h2>
+<ul>
+<li>PHP 8.2 con Apache</li>
+<li>Estensioni: <code>mysqli</code>, <code>pdo</code>,
+<code>pdo_mysql</code>, <code>zip</code>, <code>gd</code></li>
+<li>Composer</li>
+<li><code>mod_rewrite</code> e <code>mod_ssl</code></li>
+<li>Certificato SSL self-signed per lo sviluppo locale</li>
+<li>Configurazione Apache</li>
+<li>Configurazione PHP (<code>display_errors</code>, timezone, limiti
+upload…)</li>
+</ul>
+</section>
+<section id="costruire-limmagine-base" class="slide level2">
+<h2>Costruire l’immagine base</h2>
+<p>Si fa <strong>una volta sola</strong> (o quando si modifica
+qualcosa)</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docker-base-image</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> didattica-php:latest .</span></code></pre></div>
+<p>Tutti i progetti useranno questa immagine<br />
+senza doverla ricostruire</p>
+</section>
+<section id="struttura-progetto-template" class="slide level2">
+<h2>Struttura: progetto-template</h2>
+<pre><code>progetto-template/
+├── docker-compose.yml
+├── docker-compose.override.yml
+├── .env.example
+├── .gitignore
+├── db-init/
+│   ├── 01_schema.sql
+│   └── 02_seed.sql
+├── db-data/
+│   └── load.sh
+└── www/
+    ├── conf/config.php
+    ├── public/
+    ├── src/
+    ├── templates/
+    ├── index.php
+    └── composer.json</code></pre>
+</section>
+<section id="docker-compose.yml" class="slide level2">
+<h2>docker-compose.yml</h2>
+<p>Usa l’immagine condivisa definita in precedenza, senza doverla
+ricostruire per ogni progetto:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">web</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image</span><span class="kw">:</span><span class="at"> didattica-php:latest</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./www:/var/www/html</span><span class="co">   # bind mount</span></span></code></pre></div>
+</section>
+<section id="il-file-.env" class="slide level2">
+<h2>Il file .env</h2>
+<p>Ogni progetto ha il suo <code>.env</code> con configurazione
+isolata</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">PROJECT_NAME</span><span class="ot">=</span><span class="st">biblioteca</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">PORT_HTTP</span><span class="ot">=</span><span class="dv">9080</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">PORT_HTTPS</span><span class="ot">=</span><span class="dv">9443</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dt">PORT_DB</span><span class="ot">=</span><span class="dv">3306</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dt">PORT_ADMINER</span><span class="ot">=</span><span class="dv">8080</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dt">MYSQL_DATABASE</span><span class="ot">=</span><span class="st">biblioteca_db</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">MYSQL_USER</span><span class="ot">=</span><span class="st">utente</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="dt">MYSQL_PASSWORD</span><span class="ot">=</span><span class="st">password</span></span></code></pre></div>
+<p>Con più progetti attivi contemporaneamente:<br />
+basta usare <strong>porte diverse</strong> in ogni <code>.env</code></p>
+</section>
+<section id="inizializzazione-del-database" class="slide level2">
+<h2>Inizializzazione del database</h2>
+<p>Gli script in <code>db-init/</code> vengono eseguiti
+<strong>automaticamente</strong><br />
+al primo avvio del container, se il volume è vuoto</p>
+<pre><code>db-init/
+├── 01_schema.sql   ← CREATE TABLE ...
+└── 02_seed.sql     ← INSERT INTO ...</code></pre>
+<p>Per reinizializzare da zero:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose down <span class="at">-v</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
+</section>
+<section id="creare-un-nuovo-progetto" class="slide level2">
+<h2>Creare un nuovo progetto</h2>
+<p><strong>Linux/Mac:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> <span class="at">-r</span> progetto-template progetto-nuovo</span></code></pre></div>
+<p><strong>Windows (PowerShell):</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Copy-Item</span> <span class="op">-</span>Recurse progetto<span class="op">-</span>template progetto<span class="op">-</span>nuovo</span></code></pre></div>
+<p><strong>Windows (Prompt dei comandi):</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">xcopy</span> progetto<span class="at">-template</span> progetto<span class="at">-nuovo</span> <span class="at">/E</span> <span class="at">/I</span></span></code></pre></div>
+</section>
+<section id="avviare-un-nuovo-progetto" class="slide level2">
+<h2>Avviare un nuovo progetto</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> progetto-nuovo</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Configura l&#39;ambiente (editor preferito)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Scrivi lo schema del database</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#    modifica db-init/01_schema.sql</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    modifica db-init/02_seed.sql</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Avvia i container</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Installa le dipendenze PHP</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec <span class="op">&lt;</span>PROJECT_NAME<span class="op">&gt;</span>_web composer install</span></code></pre></div>
+</section>
+<section id="comandi-utili" class="slide level2">
+<h2>Comandi utili</h2>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fermare i container</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose down</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fermare e cancellare i dati del DB</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose down <span class="at">-v</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Log in tempo reale</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose logs <span class="at">-f</span> <span class="op">&lt;</span>PROJECT_NAME<span class="op">&gt;</span>_web</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Shell nel container</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec <span class="at">-it</span> <span class="op">&lt;</span>PROJECT_NAME<span class="op">&gt;</span>_web bash</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generare hash password</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec <span class="op">&lt;</span>PROJECT_NAME<span class="op">&gt;</span>_web php <span class="dt">\</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">-r</span> <span class="st">&quot;echo password_hash(&#39;password&#39;, PASSWORD_DEFAULT);&quot;</span></span></code></pre></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="phpstorm" class="title-slide slide level1">
+<h1>PHPStorm</h1>
+<p>Un progetto per ogni cartella</p>
+</section>
+<section id="strategia-un-progetto-phpstorm-per-cartella"
+class="slide level2">
+<h2>Strategia: un progetto PHPStorm per cartella</h2>
+<p>Ogni cartella-progetto (<code>progetto-a/</code>,
+<code>progetto-b/</code>, …)<br />
+diventa un <strong>progetto PHPStorm separato</strong></p>
+<p>Vantaggi: - Configurazione PHP, database e server isolata per
+progetto - Nessuna interferenza tra progetti diversi - La cartella
+<code>.idea/</code> rimane dentro la cartella del progetto</p>
+</section>
+<section id="piano-di-lavoro-panoramica" class="slide level2">
+<h2>Piano di lavoro: panoramica</h2>
+<ol type="1">
+<li>Copiare <code>progetto-template/</code></li>
+<li>Aprire la cartella in PHPStorm</li>
+<li>Creare e compilare il file <code>.env</code> e scrivere schema/seed
+SQL</li>
+<li>Avviare i container</li>
+<li>Configurare l’interprete PHP remoto (via Docker)</li>
+<li>Configurare la connessione al database</li>
+<li>Installare le dipendenze con Composer</li>
+<li>Configurare il server locale (opzionale)</li>
+</ol>
+</section>
+<section id="passo-1-copiare-il-template" class="slide level2">
+<h2>Passo 1 — Copiare il template</h2>
+<p>Copia <code>progetto-template/</code> con il nome del nuovo
+progetto<br />
+(vedi slide precedenti per il comando corretto su Windows/Linux)</p>
+</section>
+<section id="passo-2-aprire-il-progetto-in-phpstorm"
+class="slide level2">
+<h2>Passo 2 — Aprire il progetto in PHPStorm</h2>
+<p><strong>File → Open</strong><br />
+Seleziona la cartella del nuovo progetto (es.
+<code>progetto-nuovo/</code>)<br />
+Conferma con <strong>Open</strong> (non la cartella parent)</p>
+<p>PHPStorm creerà automaticamente la cartella <code>.idea/</code><br />
+con la configurazione del progetto</p>
+</section>
+<section id="passo-3---configurazione-variabili-dambiente-e-database"
+class="slide level2">
+<h2>Passo 3 - Configurazione variabili d’ambiente e database</h2>
+<p>Aprire il file <code>.env.example</code> con l’editor
+preferito,<br />
+compilarlo con nome, porte e credenziali, e salvarlo come
+<code>.env</code></p>
+<p>Se si utilizza il database, modificare opportunamente i file
+<code>db-init\01_schema.sql</code> e
+<code>db-init\02_seed.sql</code>.</p>
+</section>
+<section id="passo-4-avviare-i-container" class="slide level2">
+<h2>Passo 4 — Avviare i container</h2>
+<p>Prima di configurare PHPStorm, avvia i container:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
+<p>PHPStorm deve poter raggiungere il container<br />
+per configurare l’interprete PHP</p>
+</section>
+<section id="passo-5-configurare-linterprete-php" class="slide level2">
+<h2>Passo 5 — Configurare l’interprete PHP</h2>
+<p><strong>File → Settings → PHP</strong></p>
+<p>In <strong>CLI Interpreter</strong>, clicca <code>...</code> poi
+<code>+</code><br />
+Scegli <strong>From Docker, Vagrant, VM, WSL, Remote…</strong></p>
+<p>Seleziona <strong>Docker</strong> o <strong>Docker Compose</strong>,
+dipende da cosa si sta utilizzando, e si scelga l’immagine corretta,
+quella che contiene <code>web</code> nel nome.</p>
+<p>PHPStorm rileverà automaticamente la versione di PHP<br />
+e il percorso dell’eseguibile</p>
+</section>
+<section id="passo-5-interprete-php-continua" class="slide level2">
+<h2>Passo 5 — Interprete PHP (continua)</h2>
+<p>Dopo aver aggiunto l’interprete, torna in <strong>File → Settings →
+PHP</strong><br />
+e seleziona il nuovo interprete come quello attivo per il progetto</p>
+<p>Verifica che la versione rilevata sia <strong>PHP 8.2</strong></p>
+</section>
+<section id="passo-6-configurare-il-database" class="slide level2">
+<h2>Passo 6 — Configurare il database</h2>
+<p><strong>View → Tool Windows → Database</strong><br />
+Nel pannello Database, clicca <code>+</code> → <strong>Data Source →
+MariaDB</strong></p>
+<p>Compila: - <strong>Host:</strong> <code>localhost</code> -
+<strong>Port:</strong> il valore di <code>PORT_DB</code> dal tuo
+<code>.env</code> (default: <code>3306</code>) -
+<strong>Database:</strong> il valore di <code>MYSQL_DATABASE</code> -
+<strong>User / Password:</strong> i valori di <code>MYSQL_USER</code> /
+<code>MYSQL_PASSWORD</code></p>
+<p>Clicca <strong>Test Connection</strong> per verificare</p>
+</section>
+<section id="passo-6-database-continua" class="slide level2">
+<h2>Passo 6 — Database (continua)</h2>
+<p>Se PHPStorm segnala che manca il driver MariaDB,<br />
+clicca <strong>Download</strong> nel banner che appare in basso nella
+finestra</p>
+<p>Dopo il download, ripeti <strong>Test Connection</strong>:<br />
+dovrebbe comparire il messaggio <strong>Successful</strong></p>
+</section>
+<section id="passo-7-installare-le-dipendenze-php" class="slide level2">
+<h2>Passo 7 — Installare le dipendenze PHP</h2>
+<p>Dal terminale (interno a PHPStorm o esterno):</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> exec <span class="op">&lt;</span>PROJECT_NAME<span class="op">&gt;</span>_web composer install</span></code></pre></div>
+<p>Dopo l’installazione, PHPStorm dovrebbe riconoscere<br />
+automaticamente le classi in <code>vendor/</code><br />
+(Slim, PHP-DI, Plates…) e offrire autocompletamento</p>
+</section>
+<section id="passo-8-configurare-il-server-locale-opzionale"
+class="slide level2">
+<h2>Passo 8 — Configurare il server locale (opzionale)</h2>
+<p>Per usare <strong>Run/Debug</strong> di PHPStorm direttamente:</p>
+<p><strong>File → Settings → PHP → Servers</strong><br />
+Clicca <code>+</code> e compila: - <strong>Name:</strong> nome del
+progetto - <strong>Host:</strong> <code>localhost</code> -
+<strong>Port:</strong> il valore di <code>PORT_HTTP</code> dal
+<code>.env</code></p>
+<p>Spunta <strong>Use path mappings</strong> e mappa<br />
+la cartella locale <code>www/</code> → <code>/var/www/html</code> nel
+container</p>
+</section>
+<section id="struttura-finale-in-phpstorm" class="slide level2">
+<h2>Struttura finale in PHPStorm</h2>
+<pre><code>progetto-nuovo/          ← radice del progetto PHPStorm
+├── .idea/               ← configurazione PHPStorm (non committare)
+├── docker-compose.yml
+├── .env
+├── db-init/
+└── www/                 ← tutto il codice PHP
+    ├── src/
+    ├── templates/
+    └── index.php</code></pre>
+<p>L’autocompletamento, la navigazione tra classi<br />
+e il controllo degli errori funzionano su <code>www/</code></p>
+</section>
+<section id="aggiornare-.gitignore-per-phpstorm" class="slide level2">
+<h2>Aggiornare .gitignore per PHPStorm</h2>
+<p>La cartella <code>.idea/</code> è già nel <code>.gitignore</code> del
+template</p>
+<p>Verifica che ci sia questa riga:</p>
+<pre><code>.idea/</code></pre>
+<p>La configurazione PHPStorm rimane locale<br />
+e non viene condivisa nel repository</p>
+</section>
+<section id="flusso-completo-riepilogo" class="slide level2">
+<h2>Flusso completo: riepilogo</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Passo</th>
+<th>Azione</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Copiare <code>progetto-template/</code></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Aprire la cartella in PHPStorm</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Creare <code>.env</code> e scrivere schema SQL e seed</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>eseguire <code>docker compose up -d</code></td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Configurare interprete PHP (Docker)</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Configurare connessione database</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><code>composer install</code> nel container</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Sviluppare in <code>www/</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="riferimenti" class="slide level2">
+<h2>Riferimenti</h2>
+<ul>
+<li>Documentazione Docker: <a
+href="https://docs.docker.com">docs.docker.com</a></li>
+<li>PHPStorm + Docker: <a
+href="https://www.jetbrains.com/help/phpstorm/">jetbrains.com/help/phpstorm</a></li>
+<li>Slim Framework: <a
+href="https://www.slimframework.com">slimframework.com</a></li>
+<li>Composer: <a href="https://getcomposer.org">getcomposer.org</a></li>
+</ul>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section id="fine" class="title-slide slide level1">
+<h1>Fine</h1>
+
+</section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.js"></script>
+
+  <!-- reveal.js plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/plugin/search/search.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'default',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'fade',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>
