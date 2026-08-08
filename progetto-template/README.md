@@ -54,9 +54,14 @@ progetto/
 │   └── load.sh                 # Script per caricare dati aggiuntivi manualmente
 ├── docs/                       # Documentazione del progetto
 └── www/                        # Codice PHP (montato via bind mount)
-    ├── conf/
+    ├── conf/                   # Configurazione non esposta da Apache
     │   └── config.php          # Configurazione applicazione (DB, env, ecc.)
-    ├── public/                 # Asset statici (css, js, img)
+    ├── public/                 # DocumentRoot Apache
+    │   ├── css/
+    │   ├── img/
+    │   ├── js/
+    │   ├── .htaccess            # Riscrittura URL per Slim
+    │   └── index.php            # Front-controller dell'applicazione
     ├── src/
     │   ├── Controller/
     │   ├── Model/
@@ -64,9 +69,8 @@ progetto/
     ├── storage/                # File caricati dagli utenti (non committare)
     ├── templates/              # Template HTML (Plates)
     ├── vendor/                 # Dipendenze Composer (non committare)
-    ├── .htaccess               # Riscrittura URL per Slim
     ├── composer.json
-    └── index.php               # Punto di ingresso dell'applicazione
+    └── ...                     # Sorgenti non direttamente esposti dal web server
 ```
 
 ## Comandi utili
@@ -107,6 +111,8 @@ docker exec <PROJECT_NAME>_web composer update
 - Il database viene inizializzato con gli script in `db-init/` **solo al primo avvio**
   (quando il volume `db_data` è vuoto). Per reinizializzare da zero: `docker compose down -v`
 - La cartella `www/` è montata direttamente nel container: le modifiche al codice
-  sono immediatamente visibili senza riavviare nulla
+  sono immediatamente visibili senza riavviare nulla. Apache usa `www/public/` come
+  DocumentRoot, così configurazione, sorgenti, template e dipendenze restano fuori
+  dalla radice pubblica.
 - Se hai più progetti attivi contemporaneamente, assicurati che ogni progetto
   usi porte diverse nel file `.env`

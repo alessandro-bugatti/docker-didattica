@@ -29,7 +29,7 @@ docker-didattica/
 │   ├── db-init/
 │   ├── db-data/
 │   ├── docs/
-│   └── www/
+│   └── www/                 # Codice applicativo; Apache espone solo www/public/
 │
 ├── progetto-a/            # Ogni progetto è una copia del template
 ├── progetto-b/

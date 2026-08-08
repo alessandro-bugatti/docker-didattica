@@ -87,10 +87,9 @@ progetto-template/
 │   └── load.sh
 └── www/
     ├── conf/config.php
-    ├── public/
+    ├── public/index.php       # DocumentRoot Apache e front-controller
     ├── src/
     ├── templates/
-    ├── index.php
     └── composer.json
 ```
 
@@ -105,7 +104,7 @@ per ogni progetto:
 web:
   image: didattica-php:latest
   volumes:
-    - ./www:/var/www/html   # bind mount
+    - ./www:/var/www/html   # Apache espone /var/www/html/public
 ```
 
 ---
@@ -358,7 +357,8 @@ Clicca `+` e compila:
 - **Port:** il valore di `PORT_HTTP` dal `.env`
 
 Spunta **Use path mappings** e mappa  
-la cartella locale `www/` → `/var/www/html` nel container
+la cartella locale `www/` → `/var/www/html` nel container;
+la DocumentRoot Apache è `/var/www/html/public`
 
 ---
 
@@ -373,11 +373,11 @@ progetto-nuovo/          ← radice del progetto PHPStorm
 └── www/                 ← tutto il codice PHP
     ├── src/
     ├── templates/
-    └── index.php
+    └── public/index.php ← front-controller e DocumentRoot
 ```
 
 L'autocompletamento, la navigazione tra classi  
-e il controllo degli errori funzionano su `www/`
+e il controllo degli errori funzionano su `www/` (con `public/` come radice web)
 
 ---
 
@@ -407,7 +407,7 @@ e non viene condivisa nel repository
 | 5 | Configurare interprete PHP (Docker) |
 | 6 | Configurare connessione database |
 | 7 | `composer install` nel container |
-| 8 | Sviluppare in `www/` |
+| 8 | Sviluppare in `www/`, con il front-controller in `www/public/` |
 
 ---
 
@@ -421,4 +421,3 @@ e non viene condivisa nel repository
 ---
 
 # Fine
-

@@ -7,7 +7,7 @@ services:
       - "${PORT_HTTP}:80"
       - "${PORT_HTTPS}:443"
     volumes:
-      - ./www:/var/www/html              # codice del progetto (bind mount)
+      - ./www:/var/www/html              # codice del progetto; Apache espone solo /public
       - storage_data:/var/www/html/storage
     networks:
       - app_network

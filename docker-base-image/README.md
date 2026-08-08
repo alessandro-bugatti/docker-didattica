@@ -9,6 +9,7 @@ Incluso nell'immagine:
 - `mod_rewrite` e `mod_ssl` abilitati
 - Certificato SSL self-signed per lo sviluppo locale (valido 10 anni)
 - Configurazione Apache (`000-default.conf`, `ssl-default.conf`)
+- DocumentRoot Apache impostata su `/var/www/html/public`
 - Configurazione PHP (`php.ini`)
 
 ## Costruire l'immagine (una volta sola)
@@ -52,6 +53,6 @@ docker-base-image/
 │   ├── php.ini              # PHP sviluppo (display_errors On, ecc.)
 │   └── php-production.ini   # Riferimento produzione (non copiato nell'immagine)
 └── apache-config/
-    ├── 000-default.conf     # VirtualHost HTTP + HTTPS
+    ├── 000-default.conf     # VirtualHost HTTP + HTTPS, DocumentRoot /var/www/html/public
     └── ssl-default.conf     # VirtualHost HTTPS standalone
 ```

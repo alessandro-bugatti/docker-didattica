@@ -175,10 +175,9 @@ senza doverla ricostruire</p>
 │   └── load.sh
 └── www/
     ├── conf/config.php
-    ├── public/
+    ├── public/index.php       # DocumentRoot Apache e front-controller
     ├── src/
     ├── templates/
-    ├── index.php
     └── composer.json</code></pre>
 </section>
 <section id="docker-compose.yml" class="slide level2">
@@ -189,7 +188,7 @@ ricostruire per ogni progetto:</p>
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">web</span><span class="kw">:</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image</span><span class="kw">:</span><span class="at"> didattica-php:latest</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">volumes</span><span class="kw">:</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./www:/var/www/html</span><span class="co">   # bind mount</span></span></code></pre></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> ./www:/var/www/html</span><span class="co">   # Apache espone /var/www/html/public</span></span></code></pre></div>
 </section>
 <section id="il-file-.env" class="slide level2">
 <h2>Il file .env</h2>
@@ -398,7 +397,8 @@ progetto - <strong>Host:</strong> <code>localhost</code> -
 <code>.env</code></p>
 <p>Spunta <strong>Use path mappings</strong> e mappa<br />
 la cartella locale <code>www/</code> → <code>/var/www/html</code> nel
-container</p>
+container; la DocumentRoot Apache è
+<code>/var/www/html/public</code></p>
 </section>
 <section id="struttura-finale-in-phpstorm" class="slide level2">
 <h2>Struttura finale in PHPStorm</h2>
@@ -410,9 +410,10 @@ container</p>
 └── www/                 ← tutto il codice PHP
     ├── src/
     ├── templates/
-    └── index.php</code></pre>
+    └── public/index.php ← front-controller e DocumentRoot</code></pre>
 <p>L’autocompletamento, la navigazione tra classi<br />
-e il controllo degli errori funzionano su <code>www/</code></p>
+e il controllo degli errori funzionano su <code>www/</code> (con
+<code>public/</code> come radice web)</p>
 </section>
 <section id="aggiornare-.gitignore-per-phpstorm" class="slide level2">
 <h2>Aggiornare .gitignore per PHPStorm</h2>
@@ -463,7 +464,8 @@ e non viene condivisa nel repository</p>
 </tr>
 <tr class="even">
 <td>8</td>
-<td>Sviluppare in <code>www/</code></td>
+<td>Sviluppare in <code>www/</code>, con il front-controller in
+<code>www/public/</code></td>
 </tr>
 </tbody>
 </table>
