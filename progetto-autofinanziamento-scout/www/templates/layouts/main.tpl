@@ -15,7 +15,20 @@
 <header class="container">
     <nav>
         <ul><li><strong>Autofinanziamento scout</strong></li></ul>
-        <ul><li><a href="/prodotti">Prodotti</a></li><li><a href="/prodotti/nuovo" role="button">Nuovo prodotto</a></li></ul>
+        <ul>
+            <li><a href="/prodotti">Prodotti</a></li>
+            <?php if (!empty($_SESSION['user'])): ?>
+                <li><a href="/admin/prodotti">Dashboard</a></li>
+                <li>
+                    <form method="post" action="/logout" style="display:inline">
+                        <input type="hidden" name="_csrf" value="<?= $this->e(\Util\Csrf::token()) ?>">
+                        <button type="submit" class="secondary outline">Esci</button>
+                    </form>
+                </li>
+            <?php else: ?>
+                <li><a href="/login">Accedi</a></li>
+            <?php endif; ?>
+        </ul>
     </nav>
 </header>
 <main class="container">

@@ -3,10 +3,10 @@
 Progetto didattico per mostrare come costruire un'applicazione SSR con PHP,
 Slim, Plates e PDO, usando Docker per avviare Apache/PHP e MariaDB.
 
-La prima iterazione è una dashboard CRUD pubblica per i prodotti venduti dal
-gruppo scout. Non è ancora presente autenticazione: chiunque raggiunga il sito
-può creare, modificare ed eliminare prodotti. Questa è una scelta intenzionale
-per introdurre un concetto alla volta.
+La prima iterazione comprende un catalogo pubblico e una dashboard CRUD
+riservata agli amministratori per i prodotti venduti dal gruppo scout.
+Gli utenti anonimi possono consultare i prodotti, mentre solo un utente con
+ruolo amministratore può modificare il catalogo e il magazzino.
 
 ## Avvio rapido
 
@@ -21,6 +21,15 @@ per introdurre un concetto alla volta.
 
 4. Apri [http://localhost:9081](http://localhost:9081). Adminer è disponibile
    su [http://localhost:8081](http://localhost:8081).
+
+Il catalogo pubblico è disponibile su /prodotti. La dashboard è protetta e
+si raggiunge da /login. L'account amministratore di prova è:
+
+    username: admin
+    password: admin123
+
+La password è presente solo per le esercitazioni locali: deve essere cambiata
+prima di qualsiasi utilizzo reale.
 
 Durante l'avvio il container assegna automaticamente la cartella degli upload
 all'utente `www-data`, cioè l'utente con cui Apache esegue PHP. Questo passaggio
@@ -48,6 +57,27 @@ vuoto. Per ripartire dai dati iniziali: `docker compose down -v` e poi
 `docker compose up -d`.
 
 ## Struttura didattica
+
+Se il progetto era già stato avviato prima dell'aggiunta della tabella utenti,
+è necessario ricreare il volume del database con docker compose down -v;
+gli script di inizializzazione non vengono rieseguiti su un volume già popolato.
+
+Gli utenti e i ruoli sono gestiti da UserRepository; AuthMiddleware protegge le
+route amministrative sotto /admin.
+
+### Aggiornare l'autoload dopo aver aggiunto nuove classi
+
+Quando si aggiunge una nuova classe o un nuovo namespace al file
+www/composer.json, bisogna rigenerare l'autoloader Composer:
+
+    docker exec scout-prodotti_web composer dump-autoload
+
+In alternativa, al primo avvio o dopo aver modificato le dipendenze:
+
+    docker exec scout-prodotti_web composer install
+
+Se compare un errore come Class Middleware\AuthMiddleware not found, eseguire
+uno dei due comandi sopra e ricaricare la pagina.
 
 La cartella `www/public/` è il DocumentRoot e contiene il front-controller.
 Le route Slim chiamano `ProductController`, che usa `ProductRepository` per

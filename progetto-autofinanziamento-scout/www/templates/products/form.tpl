@@ -5,6 +5,7 @@
 <article aria-label="Errori di validazione"><strong>Controlla i dati:</strong><ul><?php foreach ($errors as $error): ?><li><?= $this->e($error) ?></li><?php endforeach; ?></ul></article>
 <?php endif; ?>
 <form method="post" action="<?= $this->e($formAction) ?>" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<?= $this->e(\Util\Csrf::token()) ?>">
     <label>Nome
         <input name="nome" required maxlength="120" value="<?= $this->e($product['nome']) ?>">
     </label>

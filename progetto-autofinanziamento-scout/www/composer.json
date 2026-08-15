@@ -19,7 +19,8 @@
         "psr-4": {
             "Controller\\": "src/Controller/",
             "Model\\": "src/Model/",
-            "Util\\": "src/Util/"
+            "Util\\": "src/Util/",
+            "Middleware\\": "src/Middleware/"
         }
     }
 }

@@ -6,13 +6,19 @@ use Model\ProductRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Psr7\UploadedFile;
+use Util\Csrf;
 use Util\View;
 
 final class ProductController
 {
     public function __construct(private ProductRepository $products, private View $view) {}
 
-    public function index(Request $request, Response $response): Response
+    public function publicIndex(Request $request, Response $response): Response
+    {
+        return $this->view->render($response, 'products/public', ['products' => $this->products->all()]);
+    }
+
+    public function adminIndex(Request $request, Response $response): Response
     {
         return $this->view->render($response, 'products/index', ['products' => $this->products->all()]);
     }
@@ -20,16 +26,19 @@ final class ProductController
     public function create(Request $request, Response $response): Response
     {
         return $this->view->render($response, 'products/form', [
-            'product' => $this->emptyProduct(), 'errors' => [], 'formAction' => '/prodotti', 'title' => 'Nuovo prodotto'
+            'product' => $this->emptyProduct(), 'errors' => [], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto'
         ]);
     }
 
     public function store(Request $request, Response $response): Response
     {
+        if (!$this->validCsrf($request)) {
+            return $this->view->render($response, 'products/form', ['product' => $this->emptyProduct(), 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto']);
+        }
         $result = $this->validatedData($request);
         if ($result['errors']) {
             return $this->view->render($response, 'products/form', [
-                'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/prodotti', 'title' => 'Nuovo prodotto'
+                'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto'
             ]);
         }
         $result['data']['immagine'] = $this->saveImage($request->getUploadedFiles()['immagine'] ?? null);
@@ -42,7 +51,7 @@ final class ProductController
         $product = $this->products->find((int) $args['id']);
         if (!$product) return $response->withStatus(404);
         return $this->view->render($response, 'products/form', [
-            'product' => $product, 'errors' => [], 'formAction' => '/prodotti/' . $product['id'], 'title' => 'Modifica prodotto'
+            'product' => $product, 'errors' => [], 'formAction' => '/admin/prodotti/' . $product['id'], 'title' => 'Modifica prodotto'
         ]);
     }
 
@@ -51,11 +60,14 @@ final class ProductController
         $id = (int) $args['id'];
         $product = $this->products->find($id);
         if (!$product) return $response->withStatus(404);
+        if (!$this->validCsrf($request)) {
+            return $this->view->render($response, 'products/form', ['product' => $product, 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti/' . $id, 'title' => 'Modifica prodotto']);
+        }
         $result = $this->validatedData($request);
         if ($result['errors']) {
             $result['product']['id'] = $id;
             return $this->view->render($response, 'products/form', [
-                'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/prodotti/' . $id, 'title' => 'Modifica prodotto'
+                'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/admin/prodotti/' . $id, 'title' => 'Modifica prodotto'
             ]);
         }
         $result['data']['immagine'] = $this->saveImage($request->getUploadedFiles()['immagine'] ?? null) ?: $product['immagine'];
@@ -65,8 +77,15 @@ final class ProductController
 
     public function delete(Request $request, Response $response, array $args): Response
     {
+        if (! $this->validCsrf($request)) return $response->withStatus(400);
         $this->products->delete((int) $args['id']);
         return $response->withHeader('Location', '/prodotti')->withStatus(302);
+    }
+
+    private function validCsrf(Request $request): bool
+    {
+        $input = (array) $request->getParsedBody();
+        return Csrf::isValid($input['_csrf'] ?? null);
     }
 
     private function emptyProduct(): array
