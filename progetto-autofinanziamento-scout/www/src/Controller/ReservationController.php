@@ -24,7 +24,61 @@ final class ReservationController
 
     public function adminIndex(Request $request, Response $response): Response
     {
-        return $this->view->render($response, 'reservations/admin', ['reservations' => $this->reservations->all()]);
+        return $this->view->render($response, 'reservations/admin', [
+            'customers' => $this->reservations->customersWithReservations(),
+        ]);
+    }
+
+    public function adminCustomerDetail(Request $request, Response $response, array $args): Response
+    {
+        $reservations = $this->reservations->forCustomerAsAdmin((int) $args['id']);
+        if (!$reservations) return $response->withStatus(404);
+        return $this->view->render($response, 'reservations/admin-detail', [
+            'reservations' => $reservations,
+            'total' => $this->reservations->totalForCustomer((int) $args['id']),
+            'customerName' => $reservations[0]['cliente_nome'] ?: $reservations[0]['username'],
+        ]);
+    }
+
+    public function updateStatus(Request $request, Response $response, array $args): Response
+    {
+        $input = (array) $request->getParsedBody();
+        if (!Csrf::isValid($input['_csrf'] ?? null)) return $response->withStatus(400);
+        $status = (string) ($input['stato'] ?? '');
+        $this->reservations->setDelivered((int) $args['id'], $status);
+        return $response->withHeader('Location', '/admin/prenotazioni/clienti/' . (int) $args['cliente_id'])->withStatus(302);
+    }
+
+    public function globalStatus(Request $request, Response $response): Response
+    {
+        return $this->view->render($response, 'reservations/global-status', [
+            'products' => $this->reservations->globalStatus(),
+        ]);
+    }
+
+    public function pendingProducts(Request $request, Response $response): Response
+    {
+        return $this->view->render($response, 'reservations/pending-products', [
+            'products' => $this->reservations->productsWithPendingReservations(),
+        ]);
+    }
+
+    public function pendingProductDetail(Request $request, Response $response, array $args): Response
+    {
+        $reservations = $this->reservations->pendingForProduct((int) $args['id']);
+        if (!$reservations) return $response->withStatus(404);
+        return $this->view->render($response, 'reservations/pending-detail', [
+            'reservations' => $reservations,
+            'productName' => $reservations[0]['prodotto_nome'],
+        ]);
+    }
+
+    public function deliveredReport(Request $request, Response $response): Response
+    {
+        return $this->view->render($response, 'reservations/delivered-report', [
+            'products' => $this->reservations->deliveredReport(),
+            'totals' => $this->reservations->deliveredTotals(),
+        ]);
     }
 
     public function store(Request $request, Response $response): Response

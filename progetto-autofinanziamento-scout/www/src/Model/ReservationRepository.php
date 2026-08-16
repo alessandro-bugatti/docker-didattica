@@ -11,7 +11,7 @@ final class ReservationRepository
     public function forCustomer(int $customerId): array
     {
         $statement = $this->pdo->prepare(
-            "SELECT p.id, p.stato, p.created_at, p.annullata_at,
+            "SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
                     p.quantita, pr.nome AS prodotto_nome, pr.prezzo,
                     (p.quantita * pr.prezzo) AS totale_stimato
              FROM prenotazioni p
@@ -48,6 +48,114 @@ final class ReservationRepository
              JOIN prodotti pr ON pr.id = p.prodotto_id
              ORDER BY p.created_at DESC, p.id DESC"
         )->fetchAll();
+    }
+
+    public function customersWithReservations(): array
+    {
+        return $this->pdo->query(
+            "SELECT u.id, u.nome, u.username, COUNT(p.id) AS prenotazioni_count
+             FROM utenti u
+             JOIN prenotazioni p ON p.cliente_id = u.id
+             WHERE u.ruolo = 'cliente'
+             AND p.stato = 'in_attesa'
+             GROUP BY u.id, u.nome, u.username
+             ORDER BY SUBSTRING_INDEX(u.nome, ' ', -1), u.nome"
+        )->fetchAll();
+    }
+
+    public function forCustomerAsAdmin(int $customerId): array
+    {
+        $statement = $this->pdo->prepare(
+            "SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
+                    p.quantita, u.nome AS cliente_nome, u.username,
+                    pr.nome AS prodotto_nome, pr.prezzo,
+                    (p.quantita * pr.prezzo) AS totale_stimato
+             FROM prenotazioni p
+             JOIN utenti u ON u.id = p.cliente_id
+             JOIN prodotti pr ON pr.id = p.prodotto_id
+             WHERE p.cliente_id = :cliente_id
+             ORDER BY p.created_at DESC, p.id DESC"
+        );
+        $statement->execute(['cliente_id' => $customerId]);
+        return $statement->fetchAll();
+    }
+
+    public function setDelivered(int $reservationId, string $status): bool
+    {
+        if (!in_array($status, ['in_attesa', 'consegnato'], true)) return false;
+        $statement = $this->pdo->prepare(
+            "UPDATE prenotazioni SET stato = :stato
+             WHERE id = :id AND stato IN ('in_attesa', 'consegnato')"
+        );
+        $statement->execute(['stato' => $status, 'id' => $reservationId]);
+        return $statement->rowCount() > 0;
+    }
+
+    public function globalStatus(): array
+    {
+        return $this->pdo->query(
+            "SELECT pr.id, pr.nome, pr.quantita AS quantita_rimasta,
+                    SUM(CASE WHEN p.stato <> 'annullato' THEN p.quantita ELSE 0 END) AS quantita_prenotata,
+                    pr.quantita + SUM(CASE WHEN p.stato <> 'annullato' THEN p.quantita ELSE 0 END) AS quantita_totale
+             FROM prodotti pr
+             JOIN prenotazioni p ON p.prodotto_id = pr.id
+             GROUP BY pr.id, pr.nome, pr.quantita
+             HAVING quantita_prenotata > 0
+             ORDER BY pr.nome"
+        )->fetchAll();
+    }
+
+    public function productsWithPendingReservations(): array
+    {
+        return $this->pdo->query(
+            "SELECT pr.id, pr.nome, SUM(p.quantita) AS quantita_in_attesa,
+                    COUNT(p.id) AS prenotazioni_count
+             FROM prodotti pr
+             JOIN prenotazioni p ON p.prodotto_id = pr.id
+             WHERE p.stato = 'in_attesa'
+             GROUP BY pr.id, pr.nome
+             ORDER BY pr.nome"
+        )->fetchAll();
+    }
+
+    public function pendingForProduct(int $productId): array
+    {
+        $statement = $this->pdo->prepare(
+            "SELECT p.id, p.quantita, p.created_at, u.nome AS cliente_nome, u.username,
+                    pr.nome AS prodotto_nome, pr.prezzo,
+                    (p.quantita * pr.prezzo) AS totale_stimato
+             FROM prenotazioni p
+             JOIN utenti u ON u.id = p.cliente_id
+             JOIN prodotti pr ON pr.id = p.prodotto_id
+             WHERE p.prodotto_id = :prodotto_id AND p.stato = 'in_attesa'
+             ORDER BY p.created_at, p.id"
+        );
+        $statement->execute(['prodotto_id' => $productId]);
+        return $statement->fetchAll();
+    }
+
+    public function deliveredReport(): array
+    {
+        return $this->pdo->query(
+            "SELECT pr.id, pr.nome,
+                    COALESCE(SUM(CASE WHEN p.stato = 'consegnato' THEN p.quantita ELSE 0 END), 0) AS quantita_consegnata,
+                    COALESCE(SUM(CASE WHEN p.stato = 'consegnato' THEN p.quantita * pr.prezzo ELSE 0 END), 0) AS ricavo_totale
+             FROM prodotti pr
+             LEFT JOIN prenotazioni p ON p.prodotto_id = pr.id
+             GROUP BY pr.id, pr.nome
+             ORDER BY pr.nome"
+        )->fetchAll();
+    }
+
+    public function deliveredTotals(): array
+    {
+        return $this->pdo->query(
+            "SELECT COALESCE(SUM(p.quantita), 0) AS quantita,
+                    COALESCE(SUM(p.quantita * pr.prezzo), 0) AS ricavo
+             FROM prenotazioni p
+             JOIN prodotti pr ON pr.id = p.prodotto_id
+             WHERE p.stato = 'consegnato'"
+        )->fetch() ?: ['quantita' => 0, 'ricavo' => 0];
     }
 
     public function create(int $customerId, int $productId, int $quantity): bool

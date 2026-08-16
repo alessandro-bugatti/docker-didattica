@@ -36,6 +36,10 @@ Sono disponibili anche due clienti di prova, con password `admin123`:
 quantità disponibile di un prodotto e consultare o annullare le proprie
 prenotazioni da /prenotazioni. L'annullamento ripristina il magazzino.
 
+Nella dashboard amministrativa /admin/prenotazioni sono disponibili l'elenco
+dei clienti con prenotazioni, il dettaglio delle prenotazioni e i report sullo
+stato globale, sulle prenotazioni in attesa e sui prodotti consegnati.
+
 Durante l'avvio il container assegna automaticamente la cartella degli upload
 all'utente `www-data`, cioè l'utente con cui Apache esegue PHP. Questo passaggio
 è necessario perché `storage_data` è un volume Docker nominato e, alla prima

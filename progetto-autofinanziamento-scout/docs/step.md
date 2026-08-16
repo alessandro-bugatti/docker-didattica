@@ -62,8 +62,12 @@ La password è didattica e deve essere sostituita in un ambiente reale.
 
 ## Step 3 — Gestione amministrativa degli ordini
 
-- [ ] Visualizzare gli ordini nella dashboard.
-- [ ] Aggiungere filtri, stati e stampe riepilogative.
+- [x] Visualizzare i clienti con prenotazioni e il dettaglio delle prenotazioni.
+- [x] Permettere all'amministratore di segnare una prenotazione come consegnata
+  e di riportarla in attesa.
+- [x] Mostrare lo stato globale dei prodotti prenotati.
+- [x] Mostrare i prodotti con prenotazioni in attesa e il relativo dettaglio.
+- [x] Mostrare il report dei prodotti consegnati e dei ricavi.
 
 ## Step 4 — Registrazione autonoma del cliente
 

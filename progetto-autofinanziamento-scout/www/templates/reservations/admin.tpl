@@ -1,15 +1,17 @@
-<?php $this->layout('layouts/main', ['title' => 'Prenotazioni']) ?>
+<?php $this->layout('layouts/main', ['title' => 'Clienti con prenotazioni']) ?>
 
-<h1>Prenotazioni</h1>
+<h1>Clienti con prenotazioni</h1>
+<nav aria-label="Report prenotazioni">
+    <a href="/admin/prenotazioni/stato-globale">Stato globale</a> ·
+    <a href="/admin/prenotazioni/in-attesa">Prodotti in attesa</a> ·
+    <a href="/admin/prenotazioni/consegnati">Report consegnati</a>
+</nav>
 <div style="overflow-x:auto"><table>
-    <thead><tr><th>Cliente</th><th>Prodotto</th><th>Quantità</th><th>Totale stimato</th><th>Stato</th><th>Creata</th><th>Annullata</th></tr></thead>
-    <tbody><?php foreach ($reservations as $reservation): ?><tr class="<?= $reservation['stato'] === 'annullato' ? 'cancelled' : '' ?>">
-        <td><?= $this->e($reservation['cliente_nome'] ?: $reservation['username']) ?></td>
-        <td><?= $this->e($reservation['prodotto_nome']) ?></td>
-        <td><?= (int) $reservation['quantita'] ?></td>
-        <td>€ <?= number_format((float) $reservation['totale_stimato'], 2, ',', '.') ?></td>
-        <td><?= $this->e(str_replace('_', ' ', $reservation['stato'])) ?></td>
-        <td><?= $this->e($reservation['created_at']) ?></td>
-        <td><?= $this->e($reservation['annullata_at'] ?? '') ?></td>
+    <thead><tr><th>Cliente</th><th>Username</th><th>Prenotazioni attive</th><th></th></tr></thead>
+    <tbody><?php foreach ($customers as $customer): ?><tr>
+        <td><?= $this->e($customer['nome'] ?: $customer['username']) ?></td>
+        <td><?= $this->e($customer['username']) ?></td>
+        <td><?= (int) $customer['prenotazioni_count'] ?></td>
+        <td><a href="/admin/prenotazioni/clienti/<?= (int) $customer['id'] ?>" role="button">Dettaglio</a></td>
     </tr><?php endforeach; ?></tbody>
 </table></div>

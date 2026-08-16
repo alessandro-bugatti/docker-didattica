@@ -6,6 +6,7 @@
 <?php if (!$products): ?>
     <article>Non ci sono ancora prodotti. <a href="/admin/prodotti/nuovo">Inserisci il primo prodotto</a>.</article>
 <?php else: ?>
+<p><a href="/admin/prodotti/nuovo" role="button">Aggiungi prodotto</a></p>
 <table>
     <thead><tr><th>Prodotto</th><th>Descrizione</th><th>Prezzo</th><th>Magazzino</th><th>Azioni</th></tr></thead>
     <tbody>

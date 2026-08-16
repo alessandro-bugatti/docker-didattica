@@ -80,6 +80,12 @@ $app->group('/admin', function (RouteCollectorProxy $admin): void {
     $admin->post('/prodotti/{id}', [ProductController::class, 'update']);
     $admin->post('/prodotti/{id}/elimina', [ProductController::class, 'delete']);
     $admin->get('/prenotazioni', [ReservationController::class, 'adminIndex']);
+    $admin->get('/prenotazioni/stato-globale', [ReservationController::class, 'globalStatus']);
+    $admin->get('/prenotazioni/in-attesa', [ReservationController::class, 'pendingProducts']);
+    $admin->get('/prenotazioni/in-attesa/{id}', [ReservationController::class, 'pendingProductDetail']);
+    $admin->get('/prenotazioni/consegnati', [ReservationController::class, 'deliveredReport']);
+    $admin->get('/prenotazioni/clienti/{id}', [ReservationController::class, 'adminCustomerDetail']);
+    $admin->post('/prenotazioni/{id}/stato/{cliente_id}', [ReservationController::class, 'updateStatus']);
 })->add(new AuthMiddleware());
 
 $app->run();
