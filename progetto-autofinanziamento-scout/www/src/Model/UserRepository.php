@@ -14,4 +14,11 @@ final class UserRepository
         $statement->execute(['username' => $username]);
         return $statement->fetch() ?: null;
     }
+
+    public function find(int $id): ?array
+    {
+        $statement = $this->pdo->prepare('SELECT * FROM utenti WHERE id = :id');
+        $statement->execute(['id' => $id]);
+        return $statement->fetch() ?: null;
+    }
 }

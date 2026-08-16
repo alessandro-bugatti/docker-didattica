@@ -31,6 +31,11 @@ si raggiunge da /login. L'account amministratore di prova è:
 La password è presente solo per le esercitazioni locali: deve essere cambiata
 prima di qualsiasi utilizzo reale.
 
+Sono disponibili anche due clienti di prova, con password `admin123`:
+`mario.rossi` e `anna.bianchi`. Un cliente autenticato può prenotare una
+quantità disponibile di un prodotto e consultare o annullare le proprie
+prenotazioni da /prenotazioni. L'annullamento ripristina il magazzino.
+
 Durante l'avvio il container assegna automaticamente la cartella degli upload
 all'utente `www-data`, cioè l'utente con cui Apache esegue PHP. Questo passaggio
 è necessario perché `storage_data` è un volume Docker nominato e, alla prima
@@ -61,6 +66,10 @@ vuoto. Per ripartire dai dati iniziali: `docker compose down -v` e poi
 Se il progetto era già stato avviato prima dell'aggiunta della tabella utenti,
 è necessario ricreare il volume del database con docker compose down -v;
 gli script di inizializzazione non vengono rieseguiti su un volume già popolato.
+
+Lo stesso vale per le tabelle e i dati dello step 2: dopo aver modificato gli
+script SQL, usare `docker compose down -v` e poi `docker compose up -d` in un
+ambiente didattico locale.
 
 Gli utenti e i ruoli sono gestiti da UserRepository; AuthMiddleware protegge le
 route amministrative sotto /admin.

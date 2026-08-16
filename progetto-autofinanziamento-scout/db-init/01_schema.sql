@@ -1,4 +1,4 @@
--- Utenti dell'applicazione. In questo step viene usato solo il ruolo amministratore.
+-- Utenti dell'applicazione.
 CREATE TABLE IF NOT EXISTS utenti
 (
     id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -24,3 +24,19 @@ CREATE TABLE IF NOT EXISTS prodotti
     CONSTRAINT prezzo_non_negativo CHECK (prezzo >= 0)
 ) CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
+
+-- Ogni riga rappresenta la prenotazione di un solo prodotto.
+CREATE TABLE IF NOT EXISTS prenotazioni
+(
+    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    cliente_id      INT UNSIGNED NOT NULL,
+    prodotto_id     INT UNSIGNED NOT NULL,
+    quantita        INT UNSIGNED NOT NULL,
+    stato           VARCHAR(20) NOT NULL DEFAULT 'in_attesa',
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    annullata_at    DATETIME NULL,
+    CONSTRAINT prenotazione_cliente_fk FOREIGN KEY (cliente_id) REFERENCES utenti (id),
+    CONSTRAINT prenotazione_prodotto_fk FOREIGN KEY (prodotto_id) REFERENCES prodotti (id),
+    CONSTRAINT quantita_prenotata_positiva CHECK (quantita > 0),
+    CONSTRAINT stato_prenotazione_valido CHECK (stato IN ('in_attesa', 'consegnato', 'annullato'))
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

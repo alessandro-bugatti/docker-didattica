@@ -9,6 +9,7 @@
         .actions { display: flex; gap: .5rem; align-items: center; }
         .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; padding: .5rem; margin: 0; }
         .icon-button svg { width: 1.15rem; height: 1.15rem; }
+        .cancelled { text-decoration: line-through; opacity: .6; }
     </style>
 </head>
 <body>
@@ -18,7 +19,12 @@
         <ul>
             <li><a href="/prodotti">Prodotti</a></li>
             <?php if (!empty($_SESSION['user'])): ?>
-                <li><a href="/admin/prodotti">Dashboard</a></li>
+                <?php if ($_SESSION['user']['ruolo'] === 'cliente'): ?>
+                    <li><a href="/prenotazioni">Le mie prenotazioni</a></li>
+                <?php else: ?>
+                    <li><a href="/admin/prodotti">Dashboard</a></li>
+                    <li><a href="/admin/prenotazioni">Prenotazioni</a></li>
+                <?php endif; ?>
                 <li>
                     <form method="post" action="/logout" style="display:inline">
                         <input type="hidden" name="_csrf" value="<?= $this->e(\Util\Csrf::token()) ?>">

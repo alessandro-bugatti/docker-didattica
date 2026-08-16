@@ -15,7 +15,8 @@ final class AuthController
     public function loginForm(Request $request, Response $response): Response
     {
         if (!empty($_SESSION['user'])) {
-            return $response->withHeader('Location', '/admin/prodotti')->withStatus(302);
+            $destination = $_SESSION['user']['ruolo'] === 'cliente' ? '/prenotazioni' : '/admin/prodotti';
+            return $response->withHeader('Location', $destination)->withStatus(302);
         }
 
         return $this->view->render($response, 'auth/login', ['errors' => []]);
@@ -38,7 +39,8 @@ final class AuthController
 
         session_regenerate_id(true);
         $_SESSION['user'] = ['id' => (int) $user['id'], 'username' => $user['username'], 'ruolo' => $user['ruolo'], 'nome' => $user['nome']];
-        return $response->withHeader('Location', '/admin/prodotti')->withStatus(302);
+        $destination = $user['ruolo'] === 'cliente' ? '/prenotazioni' : '/admin/prodotti';
+        return $response->withHeader('Location', $destination)->withStatus(302);
     }
 
     public function logout(Request $request, Response $response): Response

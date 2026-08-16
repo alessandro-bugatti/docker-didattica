@@ -6,7 +6,6 @@
 <?php if (!$products): ?>
     <article>Non ci sono ancora prodotti. <a href="/admin/prodotti/nuovo">Inserisci il primo prodotto</a>.</article>
 <?php else: ?>
-<div style="overflow-x:auto">
 <table>
     <thead><tr><th>Prodotto</th><th>Descrizione</th><th>Prezzo</th><th>Magazzino</th><th>Azioni</th></tr></thead>
     <tbody>
@@ -36,5 +35,4 @@
     <?php endforeach; ?>
     </tbody>
 </table>
-</div>
 <?php endif; ?>

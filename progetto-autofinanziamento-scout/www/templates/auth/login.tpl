@@ -1,7 +1,7 @@
-<?php $this->layout('layouts/main', ['title' => 'Accesso amministratore']) ?>
+<?php $this->layout('layouts/main', ['title' => 'Accesso']) ?>
 
-<h1>Accesso amministratore</h1>
-<p>Accedi per gestire i prodotti e il magazzino.</p>
+<h1>Accesso</h1>
+<p>Accedi per gestire i prodotti oppure le tue prenotazioni.</p>
 
 <?php if ($errors): ?>
 <article aria-label="Errori di accesso"><ul><?php foreach ($errors as $error): ?><li><?= $this->e($error) ?></li><?php endforeach; ?></ul></article>

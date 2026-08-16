@@ -53,10 +53,12 @@ La password è didattica e deve essere sostituita in un ambiente reale.
 
 ## Step 2 — Clienti, ordini e prenotazioni
 
-- [ ] Aggiungere utenti con ruolo cliente e alcuni account di prova.
-- [ ] Modellare ordini e righe d'ordine.
-- [ ] Definire le regole di disponibilità e prenotazione.
-- [ ] Permettere a un cliente autenticato di prenotare prodotti.
+- [x] Aggiungere utenti con ruolo cliente e alcuni account di prova.
+- [x] Modellare la tabella prenotazioni: ogni riga riguarda un solo prodotto.
+- [x] Definire le regole di disponibilità e prenotazione.
+- [x] Permettere a un cliente autenticato di prenotare prodotti.
+- [x] Mostrare al cliente le proprie prenotazioni e permetterne l'annullamento.
+- [x] Mostrare all'amministratore lo stato e la data di annullamento.
 
 ## Step 3 — Gestione amministrativa degli ordini
 

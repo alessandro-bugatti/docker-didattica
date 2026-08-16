@@ -2,10 +2,13 @@
 
 use Controller\ProductController;
 use Controller\AuthController;
+use Controller\ReservationController;
 use DI\Container;
 use League\Plates\Engine;
 use Middleware\AuthMiddleware;
+use Middleware\CustomerMiddleware;
 use Model\ProductRepository;
+use Model\ReservationRepository;
 use Model\UserRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -40,11 +43,15 @@ $container->set(Engine::class, function (): Engine {
 $container->set(View::class, fn ($container) => new View($container->get(Engine::class)));
 $container->set(ProductRepository::class, fn ($container) => new ProductRepository($container->get(PDO::class)));
 $container->set(UserRepository::class, fn ($container) => new UserRepository($container->get(PDO::class)));
+$container->set(ReservationRepository::class, fn ($container) => new ReservationRepository($container->get(PDO::class)));
 $container->set(ProductController::class, fn ($container) => new ProductController(
     $container->get(ProductRepository::class), $container->get(View::class)
 ));
 $container->set(AuthController::class, fn ($container) => new AuthController(
     $container->get(UserRepository::class), $container->get(View::class)
+));
+$container->set(ReservationController::class, fn ($container) => new ReservationController(
+    $container->get(ReservationRepository::class), $container->get(ProductRepository::class), $container->get(View::class)
 ));
 
 AppFactory::setContainer($container);
@@ -59,6 +66,12 @@ $app->get('/login', [AuthController::class, 'loginForm']);
 $app->post('/login', [AuthController::class, 'login']);
 $app->post('/logout', [AuthController::class, 'logout']);
 
+$app->group('', function (RouteCollectorProxy $customer): void {
+    $customer->get('/prenotazioni', [ReservationController::class, 'index']);
+    $customer->post('/prenotazioni', [ReservationController::class, 'store']);
+    $customer->post('/prenotazioni/{id}/annulla', [ReservationController::class, 'cancel']);
+})->add(new CustomerMiddleware());
+
 $app->group('/admin', function (RouteCollectorProxy $admin): void {
     $admin->get('/prodotti', [ProductController::class, 'adminIndex']);
     $admin->get('/prodotti/nuovo', [ProductController::class, 'create']);
@@ -66,6 +79,7 @@ $app->group('/admin', function (RouteCollectorProxy $admin): void {
     $admin->get('/prodotti/{id}/modifica', [ProductController::class, 'edit']);
     $admin->post('/prodotti/{id}', [ProductController::class, 'update']);
     $admin->post('/prodotti/{id}/elimina', [ProductController::class, 'delete']);
+    $admin->get('/prenotazioni', [ReservationController::class, 'adminIndex']);
 })->add(new AuthMiddleware());
 
 $app->run();
