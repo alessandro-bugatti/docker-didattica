@@ -3,82 +3,105 @@
 namespace Controller;
 
 use Model\ProductRepository;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Psr7\UploadedFile;
 use Util\Csrf;
-use Util\View;
 
 final class ProductController
 {
-    public function __construct(private ProductRepository $products, private View $view) {}
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     public function publicIndex(Request $request, Response $response): Response
     {
-        return $this->view->render($response, 'products/public', ['products' => $this->products->all()]);
+        $products = ProductRepository::all();
+        $engine = $this->container->get('template');
+        $response->getBody()->write($engine->render('products/public', ['products' => $products]));
+        return $response;
     }
 
     public function adminIndex(Request $request, Response $response): Response
     {
-        return $this->view->render($response, 'products/index', ['products' => $this->products->all()]);
+        $products = ProductRepository::all();
+        $engine = $this->container->get('template');
+        $response->getBody()->write($engine->render('products/index', ['products' => $products]));
+        return $response;
     }
 
     public function create(Request $request, Response $response): Response
     {
-        return $this->view->render($response, 'products/form', [
+        $engine = $this->container->get('template');
+        $response->getBody()->write($engine->render('products/form', [
             'product' => $this->emptyProduct(), 'errors' => [], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto'
-        ]);
+        ]));
+        return $response;
     }
 
     public function store(Request $request, Response $response): Response
     {
         if (!$this->validCsrf($request)) {
-            return $this->view->render($response, 'products/form', ['product' => $this->emptyProduct(), 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto']);
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('products/form', ['product' => $this->emptyProduct(), 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto']));
+            return $response;
         }
         $result = $this->validatedData($request);
         if ($result['errors']) {
-            return $this->view->render($response, 'products/form', [
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('products/form', [
                 'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/admin/prodotti', 'title' => 'Nuovo prodotto'
-            ]);
+            ]));
+            return $response;
         }
         $result['data']['immagine'] = $this->saveImage($request->getUploadedFiles()['immagine'] ?? null);
-        $this->products->create($result['data']);
+        ProductRepository::create($result['data']);
         return $response->withHeader('Location', '/prodotti')->withStatus(302);
     }
 
     public function edit(Request $request, Response $response, array $args): Response
     {
-        $product = $this->products->find((int) $args['id']);
+        $product = ProductRepository::find((int) $args['id']);
         if (!$product) return $response->withStatus(404);
-        return $this->view->render($response, 'products/form', [
+        $engine = $this->container->get('template');
+        $response->getBody()->write($engine->render('products/form', [
             'product' => $product, 'errors' => [], 'formAction' => '/admin/prodotti/' . $product['id'], 'title' => 'Modifica prodotto'
-        ]);
+        ]));
+        return $response;
     }
 
     public function update(Request $request, Response $response, array $args): Response
     {
         $id = (int) $args['id'];
-        $product = $this->products->find($id);
+        $product = ProductRepository::find($id);
         if (!$product) return $response->withStatus(404);
         if (!$this->validCsrf($request)) {
-            return $this->view->render($response, 'products/form', ['product' => $product, 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti/' . $id, 'title' => 'Modifica prodotto']);
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('products/form', ['product' => $product, 'errors' => ['La sessione del modulo non è valida. Riprova.'], 'formAction' => '/admin/prodotti/' . $id, 'title' => 'Modifica prodotto']));
+            return $response;
         }
         $result = $this->validatedData($request);
         if ($result['errors']) {
             $result['product']['id'] = $id;
-            return $this->view->render($response, 'products/form', [
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('products/form', [
                 'product' => $result['product'], 'errors' => $result['errors'], 'formAction' => '/admin/prodotti/' . $id, 'title' => 'Modifica prodotto'
-            ]);
+            ]));
+            return $response;
         }
         $result['data']['immagine'] = $this->saveImage($request->getUploadedFiles()['immagine'] ?? null) ?: $product['immagine'];
-        $this->products->update($id, $result['data']);
+        ProductRepository::update($id, $result['data']);
         return $response->withHeader('Location', '/prodotti')->withStatus(302);
     }
 
     public function delete(Request $request, Response $response, array $args): Response
     {
         if (! $this->validCsrf($request)) return $response->withStatus(400);
-        $this->products->delete((int) $args['id']);
+        ProductRepository::delete((int) $args['id']);
         return $response->withHeader('Location', '/prodotti')->withStatus(302);
     }
 

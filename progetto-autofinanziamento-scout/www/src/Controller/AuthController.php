@@ -3,14 +3,19 @@
 namespace Controller;
 
 use Model\UserRepository;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Util\Csrf;
-use Util\View;
 
 final class AuthController
 {
-    public function __construct(private UserRepository $users, private View $view) {}
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     public function loginForm(Request $request, Response $response): Response
     {
@@ -19,7 +24,9 @@ final class AuthController
             return $response->withHeader('Location', $destination)->withStatus(302);
         }
 
-        return $this->view->render($response, 'auth/login', ['errors' => []]);
+        $engine = $this->container->get('template');
+        $response->getBody()->write($engine->render('auth/login', ['errors' => []]));
+        return $response;
     }
 
     public function login(Request $request, Response $response): Response
@@ -27,14 +34,18 @@ final class AuthController
         $input = (array) $request->getParsedBody();
         $username = trim((string) ($input['username'] ?? ''));
         $password = (string) ($input['password'] ?? '');
-        $user = $this->users->findByUsername($username);
+        $user = UserRepository::findByUsername($username);
 
         if (!Csrf::isValid($input['_csrf'] ?? null)) {
-            return $this->view->render($response, 'auth/login', ['errors' => ['La sessione del modulo non è valida. Riprova.']]);
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('auth/login', ['errors' => ['La sessione del modulo non è valida. Riprova.']]));
+            return $response;
         }
 
         if (!$user || !password_verify($password, $user['password'])) {
-            return $this->view->render($response, 'auth/login', ['errors' => ['Credenziali non valide.']]);
+            $engine = $this->container->get('template');
+            $response->getBody()->write($engine->render('auth/login', ['errors' => ['Credenziali non valide.']]));
+            return $response;
         }
 
         session_regenerate_id(true);

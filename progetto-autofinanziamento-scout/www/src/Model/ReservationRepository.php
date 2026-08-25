@@ -2,15 +2,13 @@
 
 namespace Model;
 
-use PDO;
+use Util\Connection;
 
 final class ReservationRepository
 {
-    public function __construct(private PDO $pdo) {}
-
-    public function forCustomer(int $customerId): array
+    public static function forCustomer(int $customerId): array
     {
-        $statement = $this->pdo->prepare(
+        $statement = Connection::getInstance()->prepare(
             "SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
                     p.quantita, pr.nome AS prodotto_nome, pr.prezzo,
                     (p.quantita * pr.prezzo) AS totale_stimato
@@ -23,9 +21,9 @@ final class ReservationRepository
         return $statement->fetchAll();
     }
 
-    public function totalForCustomer(int $customerId): float
+    public static function totalForCustomer(int $customerId): float
     {
-        $statement = $this->pdo->prepare(
+        $statement = Connection::getInstance()->prepare(
             "SELECT COALESCE(SUM(CASE WHEN p.stato <> 'annullato'
                                       THEN p.quantita * pr.prezzo ELSE 0 END), 0)
              FROM prenotazioni p
@@ -36,9 +34,9 @@ final class ReservationRepository
         return (float) $statement->fetchColumn();
     }
 
-    public function all(): array
+    public static function all(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT p.id, p.stato, p.created_at, p.annullata_at,
                     u.nome AS cliente_nome, u.username, p.quantita,
                     pr.nome AS prodotto_nome, pr.prezzo,
@@ -50,9 +48,9 @@ final class ReservationRepository
         )->fetchAll();
     }
 
-    public function customersWithReservations(): array
+    public static function customersWithReservations(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT u.id, u.nome, u.username, COUNT(p.id) AS prenotazioni_count
              FROM utenti u
              JOIN prenotazioni p ON p.cliente_id = u.id
@@ -63,9 +61,9 @@ final class ReservationRepository
         )->fetchAll();
     }
 
-    public function forCustomerAsAdmin(int $customerId): array
+    public static function forCustomerAsAdmin(int $customerId): array
     {
-        $statement = $this->pdo->prepare(
+        $statement = Connection::getInstance()->prepare(
             "SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
                     p.quantita, u.nome AS cliente_nome, u.username,
                     pr.nome AS prodotto_nome, pr.prezzo,
@@ -80,10 +78,10 @@ final class ReservationRepository
         return $statement->fetchAll();
     }
 
-    public function setDelivered(int $reservationId, string $status): bool
+    public static function setDelivered(int $reservationId, string $status): bool
     {
         if (!in_array($status, ['in_attesa', 'consegnato'], true)) return false;
-        $statement = $this->pdo->prepare(
+        $statement = Connection::getInstance()->prepare(
             "UPDATE prenotazioni SET stato = :stato
              WHERE id = :id AND stato IN ('in_attesa', 'consegnato')"
         );
@@ -91,9 +89,9 @@ final class ReservationRepository
         return $statement->rowCount() > 0;
     }
 
-    public function globalStatus(): array
+    public static function globalStatus(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT pr.id, pr.nome, pr.quantita AS quantita_rimasta,
                     SUM(CASE WHEN p.stato <> 'annullato' THEN p.quantita ELSE 0 END) AS quantita_prenotata,
                     pr.quantita + SUM(CASE WHEN p.stato <> 'annullato' THEN p.quantita ELSE 0 END) AS quantita_totale
@@ -105,9 +103,9 @@ final class ReservationRepository
         )->fetchAll();
     }
 
-    public function productsWithPendingReservations(): array
+    public static function productsWithPendingReservations(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT pr.id, pr.nome, SUM(p.quantita) AS quantita_in_attesa,
                     COUNT(p.id) AS prenotazioni_count
              FROM prodotti pr
@@ -118,9 +116,9 @@ final class ReservationRepository
         )->fetchAll();
     }
 
-    public function pendingForProduct(int $productId): array
+    public static function pendingForProduct(int $productId): array
     {
-        $statement = $this->pdo->prepare(
+        $statement = Connection::getInstance()->prepare(
             "SELECT p.id, p.quantita, p.created_at, u.nome AS cliente_nome, u.username,
                     pr.nome AS prodotto_nome, pr.prezzo,
                     (p.quantita * pr.prezzo) AS totale_stimato
@@ -134,9 +132,9 @@ final class ReservationRepository
         return $statement->fetchAll();
     }
 
-    public function deliveredReport(): array
+    public static function deliveredReport(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT pr.id, pr.nome,
                     COALESCE(SUM(CASE WHEN p.stato = 'consegnato' THEN p.quantita ELSE 0 END), 0) AS quantita_consegnata,
                     COALESCE(SUM(CASE WHEN p.stato = 'consegnato' THEN p.quantita * pr.prezzo ELSE 0 END), 0) AS ricavo_totale
@@ -147,9 +145,9 @@ final class ReservationRepository
         )->fetchAll();
     }
 
-    public function deliveredTotals(): array
+    public static function deliveredTotals(): array
     {
-        return $this->pdo->query(
+        return Connection::getInstance()->query(
             "SELECT COALESCE(SUM(p.quantita), 0) AS quantita,
                     COALESCE(SUM(p.quantita * pr.prezzo), 0) AS ricavo
              FROM prenotazioni p
@@ -158,28 +156,29 @@ final class ReservationRepository
         )->fetch() ?: ['quantita' => 0, 'ricavo' => 0];
     }
 
-    public function create(int $customerId, int $productId, int $quantity): bool
+    public static function create(int $customerId, int $productId, int $quantity): bool
     {
-        $this->pdo->beginTransaction();
+        $pdo = Connection::getInstance();
+        $pdo->beginTransaction();
         try {
-            $product = $this->pdo->prepare('SELECT quantita FROM prodotti WHERE id = :id');
+            $product = $pdo->prepare('SELECT quantita FROM prodotti WHERE id = :id');
             $product->execute(['id' => $productId]);
             $available = $product->fetchColumn();
             if ($available === false || (int) $available < $quantity) {
-                $this->pdo->rollBack();
+                $pdo->rollBack();
                 return false;
             }
 
-            $update = $this->pdo->prepare(
+            $update = $pdo->prepare(
                 'UPDATE prodotti SET quantita = quantita - :quantita WHERE id = :id AND quantita >= :quantita'
             );
             $update->execute(['quantita' => $quantity, 'id' => $productId]);
             if ($update->rowCount() !== 1) {
-                $this->pdo->rollBack();
+                $pdo->rollBack();
                 return false;
             }
 
-            $reservation = $this->pdo->prepare(
+            $reservation = $pdo->prepare(
                 "INSERT INTO prenotazioni (cliente_id, prodotto_id, quantita, stato)
                  VALUES (:cliente_id, :prodotto_id, :quantita, 'in_attesa')"
             );
@@ -188,19 +187,20 @@ final class ReservationRepository
                 'prodotto_id' => $productId,
                 'quantita' => $quantity,
             ]);
-            $this->pdo->commit();
+            $pdo->commit();
             return true;
         } catch (\Throwable $exception) {
-            if ($this->pdo->inTransaction()) $this->pdo->rollBack();
+            if ($pdo->inTransaction()) $pdo->rollBack();
             throw $exception;
         }
     }
 
-    public function cancel(int $reservationId, int $customerId): bool
+    public static function cancel(int $reservationId, int $customerId): bool
     {
-        $this->pdo->beginTransaction();
+        $pdo = Connection::getInstance();
+        $pdo->beginTransaction();
         try {
-            $query = $this->pdo->prepare(
+            $query = $pdo->prepare(
                 "SELECT p.stato, p.prodotto_id, p.quantita
                  FROM prenotazioni p
                  WHERE p.id = :id AND p.cliente_id = :cliente_id"
@@ -208,19 +208,19 @@ final class ReservationRepository
             $query->execute(['id' => $reservationId, 'cliente_id' => $customerId]);
             $reservation = $query->fetch();
             if (!$reservation || $reservation['stato'] !== 'in_attesa') {
-                $this->pdo->rollBack();
+                $pdo->rollBack();
                 return false;
             }
-            $stock = $this->pdo->prepare('UPDATE prodotti SET quantita = quantita + :quantita WHERE id = :id');
+            $stock = $pdo->prepare('UPDATE prodotti SET quantita = quantita + :quantita WHERE id = :id');
             $stock->execute(['quantita' => $reservation['quantita'], 'id' => $reservation['prodotto_id']]);
-            $cancel = $this->pdo->prepare(
+            $cancel = $pdo->prepare(
                 "UPDATE prenotazioni SET stato = 'annullato', annullata_at = CURRENT_TIMESTAMP WHERE id = :id"
             );
             $cancel->execute(['id' => $reservationId]);
-            $this->pdo->commit();
+            $pdo->commit();
             return true;
         } catch (\Throwable $exception) {
-            if ($this->pdo->inTransaction()) $this->pdo->rollBack();
+            if ($pdo->inTransaction()) $pdo->rollBack();
             throw $exception;
         }
     }

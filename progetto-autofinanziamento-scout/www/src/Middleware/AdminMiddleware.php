@@ -8,7 +8,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Slim\Psr7\Response;
 
-final class AuthMiddleware implements MiddlewareInterface
+final class AdminMiddleware implements MiddlewareInterface
 {
     public function process(Request $request, Handler $handler): ResponseInterface
     {
