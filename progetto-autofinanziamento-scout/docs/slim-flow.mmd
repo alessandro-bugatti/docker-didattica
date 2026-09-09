@@ -1,0 +1,48 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+    'background': '#ffffff',
+    'primaryColor': '#ffffff',
+    'primaryBorderColor': '#000000',
+    'primaryTextColor': '#111111',
+    'lineColor': '#222222',
+    'edgeLabelBackground': '#ffffff'
+}}}%%
+flowchart TB
+    %% ===== Colonna 1 =====
+    Browser([Browser])
+    Apache[Apache]
+    IndexPHP[index.php]
+
+    %% ===== Colonna 2 =====
+    Route[Route Slim]
+    MW[Middleware]
+    Controller[Controller]
+
+    Repository[(Repository PDO)]
+    DB[(Database)]
+    Plates[/Template Plates/]
+    %% ===== Andata (richiesta) =====
+    Browser -->|1 richiesta HTTP| Apache
+    Apache -->|2 interprete PHP| IndexPHP
+    IndexPHP -->|3 dispatching| Route
+    Route -->|4 request| MW
+    MW -->|5 request| Controller
+    Controller -->|6 query| Repository
+    Repository -->|7 SQL| DB
+
+    %% ===== Diramazione: il controller parla anche col template =====
+    Controller -->|8 risultati| Plates
+
+    %% ===== Ritorno (risposta risale la stessa catena) =====
+    DB ==>|righe| Repository
+    Repository ==>|risultati| Controller
+    Plates ==>|HTML| Controller
+    Controller ==>|9 response| MW
+    MW ==>|10 response| IndexPHP
+    IndexPHP ==>|11 response| Apache
+    Apache ==>|12 risposta HTTP| Browser
+
+    classDef node fill:#ffffff,stroke:#111111,color:#111111,stroke-width:1.5px;
+    class Browser,Apache,IndexPHP,Route,MW,Controller,Repository,DB,Plates node;
+
+
+   linkStyle default background:transparent;

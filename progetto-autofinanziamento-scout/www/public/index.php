@@ -5,15 +5,18 @@ use Controller\AuthController;
 use Controller\ReservationController;
 use DI\Container;
 use League\Plates\Engine;
+use League\Plates\Template\Template;
 use Middleware\AdminMiddleware;
 use Middleware\CustomerMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
 use Slim\Factory\AppFactory;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../conf/config.php';
+
 
 session_set_cookie_params([
     'httponly' => true,
@@ -33,11 +36,50 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
-$app->addErrorMiddleware(APP_ENV === 'development', true, true);
 
-$app->get('/', fn (Request $request, Response $response)
-        => $response->withHeader('Location', '/prodotti')
-                    ->withStatus(302));
+/**
+ * Gestisce gli errori mostrati agli utenti in produzione senza esporre
+ * dettagli tecnici dell'applicazione.
+ */
+$customErrorHandler = function(
+    Request $request,
+    \Throwable $exception,
+    bool $displayErrorDetails,
+    bool $logErrors,
+    bool $logErrorDetails
+) use ($app) : Response  {
+    if ($exception instanceof \PDOException) {
+        $statusCode = 503;
+        $message = 'Il servizio non è momentaneamente disponibile. Riprova più tardi.';
+    } elseif ($exception instanceof HttpNotFoundException) {
+        $statusCode = 404;
+        $message = 'La pagina richiesta non esiste.';
+    } else {
+        $statusCode = 500;
+        $message = 'Si è verificato un errore imprevisto. Riprova più tardi.';
+    }
+
+    $engine = $app->getContainer()->get('template');
+    $response = new \Slim\Psr7\Response($statusCode);
+    $response->getBody()->write($engine->render('errors/error', [
+        'message' => $message,
+        'statusCode' => $statusCode,
+    ]));
+
+    return $response->withHeader('Content-Type', 'text/html; charset=UTF-8');
+};
+
+
+
+$errorMiddleware = $app->addErrorMiddleware(APP_ENV === 'development', true, true);
+if (APP_ENV === 'production') {
+    $errorMiddleware->setDefaultErrorHandler($customErrorHandler);
+}
+
+$app->get('/', function (Request $request, Response $response) {
+                return $response->withHeader('Location', '/prodotti')
+                                ->withStatus(302);
+            });
 $app->get('/prodotti', ProductController::class . ':publicIndex');
 $app->get('/login', AuthController::class . ':loginForm');
 $app->post('/login', AuthController::class . ':login');

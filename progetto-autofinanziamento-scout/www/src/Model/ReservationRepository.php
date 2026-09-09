@@ -9,13 +9,13 @@ final class ReservationRepository
     public static function forCustomer(int $customerId): array
     {
         $statement = Connection::getInstance()->prepare(
-            "SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
+            'SELECT p.id, p.cliente_id, p.stato, p.created_at, p.annullata_at,
                     p.quantita, pr.nome AS prodotto_nome, pr.prezzo,
                     (p.quantita * pr.prezzo) AS totale_stimato
              FROM prenotazioni p
              JOIN prodotti pr ON pr.id = p.prodotto_id
              WHERE p.cliente_id = :cliente_id
-             ORDER BY p.created_at DESC, p.id DESC"
+             ORDER BY p.created_at DESC, p.id DESC'
         );
         $statement->execute(['cliente_id' => $customerId]);
         return $statement->fetchAll();
@@ -161,23 +161,19 @@ final class ReservationRepository
         $pdo = Connection::getInstance();
         $pdo->beginTransaction();
         try {
-            $product = $pdo->prepare('SELECT quantita FROM prodotti WHERE id = :id');
-            $product->execute(['id' => $productId]);
-            $available = $product->fetchColumn();
-            if ($available === false || (int) $available < $quantity) {
-                $pdo->rollBack();
-                return false;
-            }
-
             $update = $pdo->prepare(
-                'UPDATE prodotti SET quantita = quantita - :quantita WHERE id = :id AND quantita >= :quantita'
+                'UPDATE prodotti 
+                        SET quantita = quantita - :quantita WHERE id = :id AND quantita >= :quantita_ric'
             );
-            $update->execute(['quantita' => $quantity, 'id' => $productId]);
+            $update->execute([
+                'quantita' => $quantity,
+                'id' => $productId,
+                'quantita_ric' => $quantity
+            ]);
             if ($update->rowCount() !== 1) {
                 $pdo->rollBack();
                 return false;
             }
-
             $reservation = $pdo->prepare(
                 "INSERT INTO prenotazioni (cliente_id, prodotto_id, quantita, stato)
                  VALUES (:cliente_id, :prodotto_id, :quantita, 'in_attesa')"

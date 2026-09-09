@@ -59,6 +59,7 @@ final class AuthController
         $input = (array) $request->getParsedBody();
         if (Csrf::isValid($input['_csrf'] ?? null)) {
             $_SESSION = [];
+            setcookie(session_name(), '', time() - 3600);
             session_destroy();
         }
         return $response->withHeader('Location', '/prodotti')->withStatus(302);
